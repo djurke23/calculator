@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Naučni Kalkulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #2980b9, #6dd5fa);
+        }
+
+        #calculator {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+
+        #display {
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            padding: 20px;
+            font-size: 30px;
+            text-align: right;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        #buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        #buttons button {
+            background-color: #eee;
+            border: none;
+            padding: 20px;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #buttons button:hover {
+            background-color: #ddd;
+            transform: translateY(-2px);
+        }
+
+        #buttons button[data-operator] {
+            background-color: #f0932b;
+            color: white;
+        }
+
+        #buttons button[data-operator]:hover {
+            background-color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    <div id="calculator">
+        <div id="display"></div>
+        <div id="buttons"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script>
+        let displayValue = '';
+        let isScientificMode = false;
+
+        function appendToDisplay(value) {
+            displayValue += value;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = displayValue;
+        }
+
+        function clearDisplay() {
+            displayValue = '';
+            updateDisplay();
+        }
+
+        function toggleMode() {
+            isScientificMode = !isScientificMode;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const buttonsContainer = document.getElementById('buttons');
+            buttonsContainer.innerHTML = ''; 
+
+            const basicButtons = [
+                '7', '8', '9', '/',
+                '4', '5', '6', '*',
+                '1', '2', '3', '-',
+                '0', '.', 'C', '+'
+            ];
+
+            const scientificButtons = [
+                'sin', 'cos', 'tan', '^',
+                'log', 'ln', '√', 'π',
+                '!', '(', ')', '%',
+                'e', 'x²', '1/x', '+/-'
+            ];
+
+            const buttonsToShow = isScientificMode ? scientificButtons : basicButtons;
+
+            buttonsToShow.forEach(value => {
+                const button = document.createElement('button');
+                button.textContent = value;
+                button.onclick = () => appendToDisplay(value);
+
+                if (/[+\-*/^]/.test(value)) {
+                    button.dataset.operator = '';
+                }
+
+                buttonsContainer.appendChild(button);
+            });
+
+            // Dugme "="
+            const equalsButton = document.createElement('button');
+            equalsButton.textContent = '=';
+            equalsButton.onclick = calculate;
+            equalsButton.style.gridColumn = 'span 2';
+            buttonsContainer.appendChild(equalsButton);
+
+            // Dugme "Sci/Norm"
+            const modeButton = document.createElement('button');
+            modeButton.textContent = isScientificMode ? 'Norm' : 'Sci';
+            modeButton.onclick = toggleMode;
+            buttonsContainer.prepend(modeButton); // Dodaj na početak
+        }
+
+        function calculate() {
+            try {
+                if (isScientificMode) {
+                    displayValue = math.evaluate(displayValue);
+                } else {
+                    displayValue = eval(displayValue);
+                }
+                updateDisplay();
+            } catch (error) {
+                displayValue = 'Error';
+                updateDisplay();
+            }
+        }
+
+        // Inicijalno prikaži osnovne tipke
+        updateButtons();
+    </script>
+</body>
+</html>
